@@ -47,16 +47,13 @@ sudo apt-get -y install elasticsearch
 sudo apt-get -y install logstash
 
 #Install Kibana
-sudo apt-get install kibana
+sudo apt-get -y install kibana
 
 # Install Nginx
-sudo apt-get -y install nginx apache2-utils
+sudo apt-get -y install nginx apache2-utilsserv
 
 # Generate a temporary self signed certificate for web nginx web server
 sudo mkdir /etc/ssl/nginx/;sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/nginx/private.key -out /etc/ssl/nginx/certificate.crt -subj "/C=US/ST=California/L=LA/O=HACKS/OU=Elasticsearch/CN=Kibana"
-
-# Set default admin username and password for basic authentication
-htpasswd -b -c /etc/nginx/htpassword.users $user $password
 
 # Create reverse proxy from 443 to localhost 5601 and encrpyt client traffic and provide basic auth
 cat > /etc/nginx/sites-available/default << EOL
@@ -68,10 +65,9 @@ server {
     ssl_certificate_key    /etc/ssl/nginx/private.key;
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
 
-    server_name example.com;
-
-    auth_basic "Restricted Access";
-    auth_basic_user_file /etc/nginx/htpasswd.users;
+#    server_name example.com;
+#    auth_basic "Restricted Access";
+#    auth_basic_user_file /etc/nginx/htpasswd.users;
 
     location / {
         proxy_pass http://localhost:5601;
@@ -83,6 +79,9 @@ server {
     }
 }
 EOL
+
+# Set default admin username and password for basic authentication
+# htpasswd -b -c /etc/nginx/htpassword.users $user $password
 
 # Set server.host in kibana.yml
 echo "server.host: localhost" > /etc/kibana/kibana.yml
@@ -107,7 +106,7 @@ output {
 EOL
 
 # Start all services
-service elasticsearch start
-service logstash start
-service kibana start
-service nginx start
+service elasticsearch restart
+service logstash restart
+service kibana restart
+service nginx restart
